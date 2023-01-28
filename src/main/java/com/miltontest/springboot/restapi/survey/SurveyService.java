@@ -1,5 +1,7 @@
 package com.miltontest.springboot.restapi.survey;
 
+import java.math.BigInteger;
+import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -59,8 +61,14 @@ public class SurveyService {
     return optionalQuestion.orElseGet(() -> new Question());
   }
 
-  public void addQuestion(String sid, Question question) {
+  public String addQuestion(String sid, Question question) {
     List<Question> questions = getAllQuestions(sid);
+    question.setId(genRandomId());
     questions.add(question);
+    return question.getId();
+  }
+  
+  private String genRandomId() {
+    return new BigInteger(32, new SecureRandom()).toString();
   }
 }
