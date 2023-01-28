@@ -71,4 +71,11 @@ public class SurveyService {
   private String genRandomId() {
     return new BigInteger(32, new SecureRandom()).toString();
   }
+
+  public boolean deleteQuestion(String sid, String qid) {
+    List<Question> questions = getAllQuestions(sid);
+    if(null == questions) return false;
+
+    return questions.removeIf(q -> q.getId().equalsIgnoreCase(qid));
+  }
 }
