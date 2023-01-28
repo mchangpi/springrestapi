@@ -78,4 +78,10 @@ public class SurveyService {
 
     return questions.removeIf(q -> q.getId().equalsIgnoreCase(qid));
   }
+
+  public void updateQuestion(String sid, String qid, Question question) {
+    deleteQuestion(sid, qid);
+    question.setId(qid);
+    getAllQuestions(sid).add(question);
+  }
 }
