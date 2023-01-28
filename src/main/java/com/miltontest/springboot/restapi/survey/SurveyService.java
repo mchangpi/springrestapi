@@ -53,9 +53,14 @@ public class SurveyService {
   public Question getSpecificQuestion(String sid, String qid) {
     List<Question> questions = getAllQuestions(sid);
     if(null == questions) return new Question();
-    
+
     Optional<Question> optionalQuestion = 
         questions.stream().filter(q -> q.getId().equalsIgnoreCase(qid)).findFirst();
     return optionalQuestion.orElseGet(() -> new Question());
+  }
+
+  public void addQuestion(String sid, Question question) {
+    List<Question> questions = getAllQuestions(sid);
+    questions.add(question);
   }
 }
