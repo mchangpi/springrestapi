@@ -15,14 +15,15 @@ import org.springframework.http.ResponseEntity;
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
 public class SurveyResourceIT {
 
-  private static String request = "/surveys/1/questions/2";
+  private static String SPECIFIC_REQUEST = "/surveys/1/questions/2";
+  private static String GENERIC_REQUEST = "/surveys/1/questions";
 
   @Autowired
   TestRestTemplate template;
   
   @Test
   void getSpecificQuestion_JsonAssert() throws JSONException {
-    ResponseEntity<String> response = template.getForEntity(request, String.class);
+    ResponseEntity<String> response = template.getForEntity(SPECIFIC_REQUEST, String.class);
     //System.out.println(response.getHeaders());
     //System.out.println(response.getBody());
   
@@ -41,11 +42,36 @@ public class SurveyResourceIT {
   
   @Test
   void getSpecificQuestion_HeaderAssert() throws JSONException {
-    ResponseEntity<String> response = template.getForEntity(request, String.class);
+    ResponseEntity<String> response = template.getForEntity(SPECIFIC_REQUEST, String.class);
     //System.out.println(response.getHeaders());
   
     assertTrue(response.getStatusCode().is2xxSuccessful());
     assertEquals("application/json", response.getHeaders().get("Content-Type").get(0));
   }
   
+  @Test
+  void getGenericQuestion_JsonAssert() throws JSONException {
+    ResponseEntity<String> response = template.getForEntity(GENERIC_REQUEST, String.class);
+    //System.out.println(response.getHeaders());
+    //System.out.println(response.getBody());
+  
+    String expected = 
+        """
+            [
+              {
+              "id": "1"
+              },
+              {
+              "id": "2"
+              },
+              {
+              "id": "3"
+              }
+            ]
+        """;
+
+    assertTrue(response.getStatusCode().is2xxSuccessful());
+    assertEquals("application/json", response.getHeaders().get("Content-Type").get(0));
+    JSONAssert.assertEquals(expected, response.getBody(), false);
+  }
 }
