@@ -10,6 +10,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.boot.test.web.client.TestRestTemplate;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
@@ -50,7 +53,7 @@ public class SurveyResourceIT {
   }
   
   @Test
-  void getGenericQuestion_JsonAssert() throws JSONException {
+  void getGenericQuestion_Assert() throws JSONException {
     ResponseEntity<String> response = template.getForEntity(GENERIC_REQUEST, String.class);
     //System.out.println(response.getHeaders());
     //System.out.println(response.getBody());
@@ -74,4 +77,34 @@ public class SurveyResourceIT {
     assertEquals("application/json", response.getHeaders().get("Content-Type").get(0));
     JSONAssert.assertEquals(expected, response.getBody(), false);
   }
+  
+  @Test
+  void addQuestion_Assert() {
+    String requestBody = """
+          {
+            "description": "Your Favorite Language",
+            "options": [
+              "Java",
+              "Python",
+              "JavaScript",
+              "Haskell"
+            ],
+            "answer": "Java"
+          }
+        """;
+
+    HttpHeaders headers = new HttpHeaders();
+    headers.add("Content-Type", "application/json");
+
+    HttpEntity<String> httpEntity = new HttpEntity<String>(requestBody, headers);
+
+    ResponseEntity<String> responseEntity = 
+        template.exchange(GENERIC_REQUEST, HttpMethod.POST, httpEntity, String.class);
+
+    assertTrue(responseEntity.getStatusCode().is2xxSuccessful());
+
+    String locationHeader = responseEntity.getHeaders().get("Location").get(0);
+    assertTrue(locationHeader.contains("/surveys/1/questions/"));
+  }
+  
 }
