@@ -79,7 +79,7 @@ public class SurveyResourceIT {
   }
   
   @Test
-  void addQuestion_Assert() {
+  void addAndDeleteQuestion_Assert() {
     String requestBody = """
           {
             "description": "Your Favorite Language",
@@ -98,13 +98,19 @@ public class SurveyResourceIT {
 
     HttpEntity<String> httpEntity = new HttpEntity<String>(requestBody, headers);
 
-    ResponseEntity<String> responseEntity = 
+    ResponseEntity<String> responseEntityPost = 
         template.exchange(GENERIC_REQUEST, HttpMethod.POST, httpEntity, String.class);
 
-    assertTrue(responseEntity.getStatusCode().is2xxSuccessful());
+    assertTrue(responseEntityPost.getStatusCode().is2xxSuccessful());
 
-    String locationHeader = responseEntity.getHeaders().get("Location").get(0);
+    String locationHeader = responseEntityPost.getHeaders().get("Location").get(0);
     assertTrue(locationHeader.contains("/surveys/1/questions/"));
+    
+    //DELETE
+    ResponseEntity<String> responseEntityDelete 
+    = template.exchange(locationHeader, HttpMethod.DELETE, httpEntity, String.class);
+
+    assertTrue(responseEntityDelete.getStatusCode().is2xxSuccessful());
   }
   
 }
