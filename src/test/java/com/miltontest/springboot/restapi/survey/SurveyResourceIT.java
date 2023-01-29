@@ -3,6 +3,8 @@ package com.miltontest.springboot.restapi.survey;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.util.Base64;
+
 import org.json.JSONException;
 import org.junit.jupiter.api.Test;
 import org.skyscreamer.jsonassert.JSONAssert;
@@ -26,10 +28,12 @@ public class SurveyResourceIT {
   
   @Test
   void getSpecificQuestion_JsonAssert() throws JSONException {
-    ResponseEntity<String> response = template.getForEntity(SPECIFIC_REQUEST, String.class);
-    //System.out.println(response.getHeaders());
-    //System.out.println(response.getBody());
   
+    HttpEntity<String> httpEntity = new HttpEntity<String>(null, getHttpContentTypeAndAuthHeaders());
+
+    ResponseEntity<String> response = 
+        template.exchange(SPECIFIC_REQUEST, HttpMethod.GET, httpEntity, String.class);
+    
     String expected = 
         """
         {   
@@ -41,23 +45,18 @@ public class SurveyResourceIT {
 
     //assertEquals(expected.trim(), response.getBody());
     JSONAssert.assertEquals(expected, response.getBody(), false);
-  }
-  
-  @Test
-  void getSpecificQuestion_HeaderAssert() throws JSONException {
-    ResponseEntity<String> response = template.getForEntity(SPECIFIC_REQUEST, String.class);
-    //System.out.println(response.getHeaders());
-  
     assertTrue(response.getStatusCode().is2xxSuccessful());
     assertEquals("application/json", response.getHeaders().get("Content-Type").get(0));
   }
   
   @Test
   void getGenericQuestion_Assert() throws JSONException {
-    ResponseEntity<String> response = template.getForEntity(GENERIC_REQUEST, String.class);
-    //System.out.println(response.getHeaders());
-    //System.out.println(response.getBody());
   
+    HttpEntity<String> httpEntity = new HttpEntity<String>(null, getHttpContentTypeAndAuthHeaders());
+
+    ResponseEntity<String> response = 
+        template.exchange(GENERIC_REQUEST, HttpMethod.GET, httpEntity, String.class);
+
     String expected = 
         """
             [
@@ -93,10 +92,7 @@ public class SurveyResourceIT {
           }
         """;
 
-    HttpHeaders headers = new HttpHeaders();
-    headers.add("Content-Type", "application/json");
-
-    HttpEntity<String> httpEntity = new HttpEntity<String>(requestBody, headers);
+    HttpEntity<String> httpEntity = new HttpEntity<String>(requestBody, getHttpContentTypeAndAuthHeaders());
 
     ResponseEntity<String> responseEntityPost = 
         template.exchange(GENERIC_REQUEST, HttpMethod.POST, httpEntity, String.class);
@@ -111,6 +107,19 @@ public class SurveyResourceIT {
     = template.exchange(locationHeader, HttpMethod.DELETE, httpEntity, String.class);
 
     assertTrue(responseEntityDelete.getStatusCode().is2xxSuccessful());
+  }
+  
+  private HttpHeaders getHttpContentTypeAndAuthHeaders() {
+    HttpHeaders headers = new HttpHeaders();
+    headers.add("Content-Type", "application/json");
+    headers.add("Authorization", "Basic " + getBasicAuthEncoding("admin", "admin"));
+    return headers;
+  }
+  
+  private String getBasicAuthEncoding(String user, String password) {
+    String combined = user + ":" + password;
+    byte[] encodedBytes = Base64.getEncoder().encode(combined.getBytes());
+    return new String(encodedBytes);
   }
   
 }
