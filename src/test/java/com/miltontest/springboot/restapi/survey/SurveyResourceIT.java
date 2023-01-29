@@ -1,6 +1,7 @@
 package com.miltontest.springboot.restapi.survey;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.json.JSONException;
 import org.junit.jupiter.api.Test;
@@ -37,4 +38,14 @@ public class SurveyResourceIT {
     //assertEquals(expected.trim(), response.getBody());
     JSONAssert.assertEquals(expected, response.getBody(), false);
   }
+  
+  @Test
+  void getSpecificQuestion_HeaderAssert() throws JSONException {
+    ResponseEntity<String> response = template.getForEntity(request, String.class);
+    //System.out.println(response.getHeaders());
+  
+    assertTrue(response.getStatusCode().is2xxSuccessful());
+    assertEquals("application/json", response.getHeaders().get("Content-Type").get(0));
+  }
+  
 }
